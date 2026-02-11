@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>评论系统 - Giscus</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 顶部标题栏 */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            z-index: 10;
+        }
+
+        .header h1 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .header-icon {
+            width: 24px;
+            height: 24px;
+            color: #667eea;
+        }
+
+        /* 主容器 */
+        .main-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        /* 评论卡片容器 */
+        .giscus-wrapper {
+            width: 100%;
+            max-width: 900px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 140px);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 加载动画 */
+        .loading-state {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #4a5568;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 0.9rem;
+            color: #718096;
+        }
+
+        /* giscus 容器 */
+        .giscus-container {
+            flex: 1;
+            overflow-y: auto;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .giscus-container.loaded {
+            opacity: 1;
+        }
+
+        .giscus-container.loaded ~ .loading-state {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* 自定义滚动条 */
+        .giscus-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .giscus-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .giscus-container::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 4px;
+        }
+
+        .giscus-container::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+
+        /* 底部信息 */
+        .footer {
+            text-align: center;
+            padding: 15px;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.85rem;
+        }
+
+        .footer a {
+            color: #fff;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(255,255,255,0.5);
+            transition: border-color 0.3s;
+        }
+
+        .footer a:hover {
+            border-color: #fff;
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.2rem;
+            }
+            
+            .giscus-wrapper {
+                padding: 15px;
+                height: calc(100vh - 120px);
+                border-radius: 12px;
+                margin: 0;
+            }
+            
+            .main-container {
+                padding: 10px;
+            }
+        }
+
+        /* 暗色模式适配 */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            }
+            
+            .header {
+                background: rgba(26, 32, 44, 0.95);
+            }
+            
+            .header h1 {
+                color: #e2e8f0;
+            }
+            
+            .giscus-wrapper {
+                background: rgba(26, 32, 44, 0.95);
+            }
+            
+            .loading-text {
+                color: #a0aec0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部标题 -->
+    <header class="header">
+        <h1>
+            <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9H11.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+            </svg>
+            评论交流区
+        </h1>
+    </header>
+
+    <!-- 主容器 -->
+    <main class="main-container">
+        <div class="giscus-wrapper">
+            <!-- 加载状态 -->
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">正在加载评论系统...</div>
+            </div>
+            
+            <!-- giscus 容器 -->
+            <div class="giscus-container" id="giscus-container">
+                <script src="https://giscus.app/client.js"
+                  data-repo="helloamger/JiNan-Company-Rating"
+                  data-repo-id="R_kgDORKDfUg"
+                  data-category="公司讨论"
+                  data-category-id="DIC_kwDORKDfUs4C19oY"
+                  data-mapping="title"
+                  data-strict="0"
+                  data-reactions-enabled="1"
+                  data-emit-metadata="0"
+                  data-input-position="bottom"
+                  data-theme="preferred_color_scheme"
+                  data-lang="zh-CN"
+                  crossorigin="anonymous"
+                  async>
+                </script>
+            </div>
+        </div>
+    </main>
+
+    <!-- 底部信息 -->
+    <footer class="footer">
+        由 <a href="https://giscus.app" target="_blank">giscus</a> 提供支持 · 基于 GitHub Discussions
+    </footer>
+
+    <script>
+        // 监听 giscus 加载完成事件
+        window.addEventListener('message', function(event) {
+            if (event.origin !== 'https://giscus.app') return;
+            
+            if (event.data && event.data.giscus) {
+                const container = document.getElementById('giscus-container');
+                const giscusFrame = container.querySelector('iframe.giscus-frame');
+                
+                if (giscusFrame) {
+                    // giscus 加载完成
+                    container.classList.add('loaded');
+                    
+                    // 调整 iframe 高度以适应内容
+                    adjustIframeHeight();
+                }
+            }
+        });
+
+        // 监听 iframe 高度变化消息
+        function adjustIframeHeight() {
+            window.addEventListener('message', function(e) {
+                if (e.origin !== 'https://giscus.app') return;
+                
+                if (e.data && typeof e.data === 'object') {
+                    const giscusFrame = document.querySelector('.giscus-frame');
+                    if (giscusFrame && e.data.giscus && e.data.giscus.resizeHeight) {
+                        giscusFrame.style.height = e.data.giscus.resizeHeight + 'px';
+                    }
+                }
+            });
+        }
+
+        // 超时处理：如果 10 秒后仍未加载，显示提示
+        setTimeout(() => {
+            const container = document.getElementById('giscus-container');
+            if (!container.classList.contains('loaded')) {
+                const loadingText = document.querySelector('.loading-text');
+                if (loadingText) {
+                    loadingText.innerHTML = '加载超时，请检查网络连接或刷新页面<br><small style="color:#e53e3e">请确保已正确配置 giscus 参数</small>';
+                }
+            }
+        }, 10000);
+    </script>
+
+</body>
+</html>
