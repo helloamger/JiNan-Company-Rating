@@ -1,5 +1,5 @@
 # JiNan-Company-Rating
-# [https://github.com/helloamger/JiNan-Company-Rating](https://github.com/helloamger/JiNan-Company-Rating)
+# [https://helloamger.github.io/JiNan-Company-Rating/](https://helloamger.github.io/JiNan-Company-Rating/)
 济南软件公司评价参考
 # 公司评价请使用上方的[Discussion](https://github.com/helloamger/JiNan-Company-Rating/discussions)功能
 
