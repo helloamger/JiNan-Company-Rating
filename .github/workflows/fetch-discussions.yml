@@ -1,0 +1,47 @@
+name: Fetch GitHub Discussions
+
+on:
+  schedule:
+    # 每2小时执行一次 (UTC时间)
+    - cron: '0 */2 * * *'
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Install dependencies
+        run: |
+          pip install requests
+          
+      - name: Run fetch script
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python fetch_list.py
+        
+      - name: Check if files changed
+        id: verify-changed-files
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Commit and push changes
+        if: steps.verify-changed-files.outputs.changed == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add discussions.json discussions.json.gz
+          git commit -m "Update discussions data [$(date +'%Y-%m-%d %H:%M:%S')]"
+          git push
