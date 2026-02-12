@@ -1,0 +1,11 @@
+# 检查点文件（不需要提交）
+discussions_checkpoint.json
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# 本地环境
+.env
+.venv/
