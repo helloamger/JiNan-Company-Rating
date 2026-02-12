@@ -2,46 +2,47 @@ name: Fetch GitHub Discussions
 
 on:
   schedule:
-    # 每2小时执行一次 (UTC时间)
     - cron: '0 */2 * * *'
-  workflow_dispatch:  # 允许手动触发
+  workflow_dispatch:
 
 jobs:
   fetch:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # 授予写入权限
     
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}  # 明确指定 token
+          persist-credentials: true  # 保持凭证用于后续推送
+          
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           
       - name: Install dependencies
-        run: |
-          pip install requests
+        run: pip install requests
           
       - name: Run fetch script
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python fetch_list.py
         
-      - name: Check if files changed
-        id: verify-changed-files
-        run: |
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "changed=false" >> $GITHUB_OUTPUT
-          fi
-          
       - name: Commit and push changes
-        if: steps.verify-changed-files.outputs.changed == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add discussions.json discussions.json.gz
-          git commit -m "Update discussions data [$(date +'%Y-%m-%d %H:%M:%S')]"
-          git push
+          
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update discussions data [$(date -u +'%Y-%m-%d %H:%M:%S UTC')]"
+            # 使用 token 进行推送
+            git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:${{ github.ref_name }}
+          fi
