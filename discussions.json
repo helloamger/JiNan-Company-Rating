@@ -1,8 +1,8 @@
 {
   "repository": "helloamger/JiNan-Company-Rating",
   "category_id": "DIC_kwDORKDfUs4C19oY",
-  "total_count": 2898,
-  "fetched_at": "2026-03-29T01:41:14.441181",
+  "total_count": 2900,
+  "fetched_at": "2026-03-29T04:42:30.574382",
   "discussions": [
     {
       "number": 1,
@@ -20289,6 +20289,20 @@
       "created_at": "2026-02-09T04:16:00Z",
       "url": "https://github.com/helloamger/JiNan-Company-Rating/discussions/3120",
       "bodyHTML": "<p dir=\"auto\">最近有没有去丞华公司面试的？能不能交流一下</p>"
+    },
+    {
+      "number": 3122,
+      "title": "山东领航医药信息咨询有限公司",
+      "created_at": "2026-03-29T03:52:48Z",
+      "url": "https://github.com/helloamger/JiNan-Company-Rating/discussions/3122",
+      "bodyHTML": "<p dir=\"auto\">这家公司怎么样，有人知道吗</p>"
+    },
+    {
+      "number": 3123,
+      "title": "山东领航医药信息咨询有限公司",
+      "created_at": "2026-03-29T03:53:24Z",
+      "url": "https://github.com/helloamger/JiNan-Company-Rating/discussions/3123",
+      "bodyHTML": "<p dir=\"auto\">这家公司怎么样，有人知道吗</p>"
     }
   ]
 }
